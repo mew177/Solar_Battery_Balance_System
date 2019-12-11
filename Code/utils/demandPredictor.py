@@ -8,7 +8,7 @@ class demandPredictor:
     def __init__(self):
         self.model = LinearRegression()
 
-    def train(self, file='../Data/electricity/electricity_record.csv'):
+    def train(self, file='../Data/electricity/electricity_record.csv', test_size=0.25, toPrint=False):
         df = pd.read_csv(file)
         df['year'] = ''
         df['month'] = ''
@@ -49,9 +49,10 @@ class demandPredictor:
         _, month, _, day = zip(*df.index.values)
         month_base, day_base = zip(*[base_mean(index[1], index[3], monthly_mean, meanDemand) for index, row in df.iterrows()])
         data = list(map(lambda x: list(x), zip(month, day, month_base, day_base)))
-        trainX, testX, trainY, testY = train_test_split(data, list(df[['demand']].demand))
+        trainX, testX, trainY, testY = train_test_split(data, list(df[['demand']].demand), test_size=test_size)
         self.model.fit(trainX, trainY)
-        print("Score: {:.2f}%".format(self.model.score(testX, testY)*100))
+        if toPrint:
+            print("Demand Predictor Model Score: {:.2f}%".format(self.model.score(testX, testY)*100))
     
     def predict(self, input):
         # input => [month, day]
